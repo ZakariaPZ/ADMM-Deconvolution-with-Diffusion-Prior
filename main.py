@@ -5,6 +5,8 @@ import argparse
 import skimage.io as io
 from skimage.metrics import peak_signal_noise_ratio as compute_psnr
 import os
+import datetime
+import json
 
 from pypher.pypher import psf2otf
 import matplotlib.pyplot as plt
@@ -33,7 +35,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    os.makedirs(f"./results", exist_ok=True)
+    # create results folder and save config
+    output_dir = f"./results/{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    os.makedirs(output_dir, exist_ok=True)
+    with open(f"{output_dir}/config.txt", 'w') as f:
+        json.dump(args.__dict__, f, indent=2)
 
     # Select image
     img = io.imread(f'testimgs/{args.img_name}').astype(float)/255
@@ -71,7 +77,7 @@ if __name__ == '__main__':
             x_admm_tv[:, :, it] = deconv_admm_tv(b[:, :, it], c, lam, rho, num_iters)
         x_admm_tv = np.clip(x_admm_tv, 0.0, 1.0)
         PSNR_ADMM_TV = round(compute_psnr(img, x_admm_tv), 1)
-        plt.imsave(f"./results/admm_tv_psnr{round(PSNR_ADMM_TV, 1)}.png", x_admm_tv)
+        plt.imsave(f"{output_dir}/admm_tv_psnr{round(PSNR_ADMM_TV, 1)}.png", x_admm_tv)
 
 
     if(args.wiener or all_condition):
@@ -86,7 +92,7 @@ if __name__ == '__main__':
             x_admm_wiener[:, :, it] = deconv_admm_wiener(b[:, :, it], c, lam, rho, num_iters, sigma)
         x_admm_wiener = np.clip(x_admm_wiener, 0.0, 1.0)
         PSNR_ADMM_WIENER = round(compute_psnr(img, x_admm_wiener), 1)
-        plt.imsave(f"./results/admm_wiener_psnr{round(PSNR_ADMM_WIENER, 1)}.png", x_admm_wiener)
+        plt.imsave(f"{output_dir}/admm_wiener_psnr{round(PSNR_ADMM_WIENER, 1)}.png", x_admm_wiener)
 
 
     if(args.dncnn or all_condition):
@@ -105,7 +111,7 @@ if __name__ == '__main__':
         b = np.clip(b, 0, 1)
         img = np.clip(img, 0, 1)
         PSNR_ADMM_DNCNN = round(compute_psnr(img, x_admm_dncnn), 1)
-        plt.imsave(f"./results/admm_dncnn_psnr{round(PSNR_ADMM_DNCNN, 1)}.png", x_admm_dncnn)
+        plt.imsave(f"{output_dir}/admm_dncnn_psnr{round(PSNR_ADMM_DNCNN, 1)}.png", x_admm_dncnn)
 
 
 
@@ -117,7 +123,7 @@ if __name__ == '__main__':
         for it in range(3):
             x_admm_bil[:, :, it] = deconv_admm_bilateral(b[:, :, it], c, lam, rho, num_iters, sigma, sigmaIntensity)
         PSNR_ADMM_BIL = round(compute_psnr(img, x_admm_bil), 1)
-        plt.imsave(f"./results/admm_bil_psnr{round(PSNR_ADMM_BIL, 1)}.png", x_admm_bil)
+        plt.imsave(f"{output_dir}/admm_bil_psnr{round(PSNR_ADMM_BIL, 1)}.png", x_admm_bil)
 
 
 
@@ -133,7 +139,7 @@ if __name__ == '__main__':
         for it in range(3):
             x_admm_NLM[:, :, it] = deconv_admm_NLM(b[:, :, it], c, lam, rho, num_iters, searchWindowRadius, sigma, nlmSigma)
         PSNR_ADMM_NLM = round(compute_psnr(img, x_admm_NLM), 1)
-        plt.imsave(f"./results/admm_nlm_psnr{round(PSNR_ADMM_NLM, 1)}.png", x_admm_NLM)
+        plt.imsave(f"{output_dir}/admm_nlm_psnr{round(PSNR_ADMM_NLM, 1)}.png", x_admm_NLM)
 
 
     if(args.diffusion or all_condition):
@@ -146,4 +152,4 @@ if __name__ == '__main__':
         x_admm_diffusion = np.clip(x_admm_diffusion, 0, 1)
         img = np.clip(img, 0, 1)
         PSNR_ADMM_DIFFUSION = round(compute_psnr(img, x_admm_diffusion), 1)
-        plt.imsave(f"./results/admm_diffusion_psnr{round(PSNR_ADMM_DIFFUSION, 1)}.png", x_admm_diffusion)
+        plt.imsave(f"{output_dir}/admm_diffusion_psnr{round(PSNR_ADMM_DIFFUSION, 1)}.png", x_admm_diffusion)
