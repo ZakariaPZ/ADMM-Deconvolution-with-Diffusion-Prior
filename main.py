@@ -29,6 +29,7 @@ if __name__ == '__main__':
     parser.add_argument('-bilateral', '--bilateral', action = 'store_true')
     parser.add_argument('-nlm', '--nlm', action = 'store_true')
     parser.add_argument('-diffusion', '--diffusion', action = 'store_true')
+    parser.add_argument('--sigma_noise', type=float, default=0.1)
 
     args = parser.parse_args()
 
@@ -45,7 +46,7 @@ if __name__ == '__main__':
     Afun = lambda x: np.real(ifft2(fft2(x) * cFT))
 
     # noise parameter - standard deviation
-    sigma = 0.1
+    sigma = args.sigma_noise
 
     # simulated measurements
     b = np.zeros(np.shape(img))
