@@ -4,7 +4,6 @@ from numpy.fft import fft2, ifft2
 import argparse
 import skimage.io as io
 from skimage.metrics import peak_signal_noise_ratio as compute_psnr
-from skimage.filters import gaussian
 import os
 
 from pypher.pypher import psf2otf
@@ -19,8 +18,6 @@ from DnCNN.deconv_admm_dncnn import *
 from wiener.deconv_admm_wiener import *
 from bilateral.deconv_admm_bilateral import *
 from diffusion.deconv_admm_diffusion import *
-
-from dataset import BSDS300Dataset
 
 
 if __name__ == '__main__':
@@ -60,8 +57,6 @@ if __name__ == '__main__':
     for arg in vars(args):
         all_condition = all_condition and (not getattr(args, arg))
     
-    # # show images
-    fig = plt.figure()
 
     if(args.TV or all_condition):
         # # # ADMM parameters for TV prior
@@ -79,7 +74,7 @@ if __name__ == '__main__':
 
 
     if(args.wiener or all_condition):
-        # # ADMM parameters for DnCNN  & Wiener Prior
+        # # ADMM parameters for Wiener Prior
         num_iters = 75
         lam = 0.05
         rho = 1 * 0.5
@@ -99,6 +94,10 @@ if __name__ == '__main__':
         torch.save(model, 'DNCNN.pth')
         model = torch.load('DNCNN.pth')
 
+        num_iters = 75
+        lam = 0.05
+        rho = 1 * 0.5
+
         # run DnCNN + ADMM
         x_admm_dncnn = deconv_admm_dncnn(b, c, lam, rho, num_iters,model)
         x_admm_dncnn = np.clip(x_admm_dncnn, 0, 1)
@@ -111,6 +110,7 @@ if __name__ == '__main__':
 
     if(args.bilateral or all_condition):
         sigmaIntensity = 0.25
+
         # # run ADMM+bilateral solver
         x_admm_bil = np.zeros(np.shape(b))
         for it in range(3):
@@ -121,12 +121,10 @@ if __name__ == '__main__':
 
 
     if(args.nlm or all_condition):
-        # # Set up NLM
-
         num_iters = 5
         lam = 0.01 * 0.5
         rho = 1 * 0.5
-        nlmSigma = 0.1  # Feel free to modify
+        nlmSigma = 0.1
         searchWindowRadius = 2
 
         # # run ADMM+NLM solver

@@ -1,20 +1,13 @@
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-from glob import glob
-import os
+from torch.utils.data import DataLoader
 import skimage.io
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
 from tqdm import tqdm
 from dataset import BSDS300Dataset
 
 # set random seeds
-torch.manual_seed(1)
-
-matplotlib.rcParams['figure.raise_window'] = False
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 

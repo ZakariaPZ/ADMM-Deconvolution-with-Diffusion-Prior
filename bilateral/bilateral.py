@@ -27,5 +27,5 @@ def bilateral2d(img, sigma, sigmaIntensity):
             # Go over a window of size (2*radius + 1) around the current pixel,
             # compute weights, sum the weighted intensity.
             # Don't forget to normalize by the sum of the weights used.
-            out[y, x] = IFiltered # TODO: Replace with your own code
+            out[y, x] = IFiltered
     return out

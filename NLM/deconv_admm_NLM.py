@@ -10,9 +10,6 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 from NLM.nlm import nonlocalmeans
 
 
-# from network_dncnn import DnCNN as net
-
-
 def deconv_admm_NLM(b, c, lam, rho, num_iters, searchWindowRadius, sigma, nlmSigma):
 
     # Blur kernel
@@ -27,31 +24,14 @@ def deconv_admm_NLM(b, c, lam, rho, num_iters, searchWindowRadius, sigma, nlmSig
     z = np.zeros_like(b)
     u = np.zeros_like(b)
 
-    # print(x.shape)
 
     # set up NLM model
     averageFilterRadius = int(sigma)
 
-    ################# begin task 2 ###################################
-
-    # ADMM with DnCNN doesn't require a gradient function, so we don't
-    # need it here. Just pre-compute the denominator for the x-update
-    # here, because that doesn't change unless rho changes, which is
-    # not the case here
-
     # pre-compute denominator of x update
-    denom = cTFT * cFT + rho  # you need to edit this placeholder
-
-    ################# end task 2 ####################################
+    denom = cTFT * cFT + rho 
 
     for it in tqdm(range(num_iters)):
-
-        ################# begin task 2 ###################################
-
-        # Complete this part by implementing the x-update discussed in
-        # class and in the problem session. If you implemented the
-        # denominator term above, you only need to compute the nominator
-        # here as well as the rest of the x-update
 
         # x update - inverse filtering: Fourier multiplications and divisions
 
@@ -59,20 +39,12 @@ def deconv_admm_NLM(b, c, lam, rho, num_iters, searchWindowRadius, sigma, nlmSig
         vFT = fft2(v)
         x = np.real(ifft2((cTFT * bFT + rho*vFT)/denom))
 
-        ################# end task 2 ####################################
-
         # z update
         v = x + u
 
-        # run DnCNN denoiser
-        # v_tensor = torch.reshape(torch.from_numpy(v).float().to(device), (1, 1, v.shape[0], v.shape[1]))
-
-        v_tensor_denoised = nonlocalmeans(v,
-                                            searchWindowRadius,
-                                            averageFilterRadius,
-                                            sigma,
-                                            nlmSigma)
-
+        v_tensor_denoised = nonlocalmeans(
+            v, searchWindowRadius, averageFilterRadius, sigma, nlmSigma
+            )
         z = np.squeeze(v_tensor_denoised)
 
         # u update

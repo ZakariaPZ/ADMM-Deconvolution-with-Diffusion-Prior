@@ -1,11 +1,7 @@
 import numpy as np
 from numpy.fft import fft2, ifft2
 from pypher.pypher import psf2otf
-from pathlib import Path
 from tqdm import tqdm
-from itertools import product
-import matplotlib.pyplot as plt
-import torch
 
 
 def deconv_admm_tv(b, c, lam, rho, num_iters, anisotropic_tv=False):
@@ -32,41 +28,19 @@ def deconv_admm_tv(b, c, lam, rho, num_iters, anisotropic_tv=False):
     z = np.zeros((2, *b.shape))
     u = np.zeros((2, *b.shape))
 
-    ################# begin task 2 ###################################
-    # Complete these parts by first copying over the grad_fn you
-    # implemented for task 1 here. What's important here (and wasn't
-    # in task 1) is that grad_fn takes as input a 2D image of size [M N]
-    # and outputs the horizontal and vertical gradients in a stack of
-    # size [2 M N]! Please keep this in mind, otherwise the z-update
-    # which is already implemented for you won't work
-
-    # Then, you can pre-compute the denominator for the x-update
-    # here, because that doesn't change unless rho changes, which is
-    # not the case here
 
     # define function handle to compute horizontal and vertical gradients
-    grad_fn = lambda x: np.real(ifft2(fft2(x) * dxyFT))   # you need to edit this, it's just a placeholder
+    grad_fn = lambda x: np.real(ifft2(fft2(x) * dxyFT))
 
     # precompute the denominator for the x-update
-    denom = (cTFT * cFT) + rho*(dxyTFT[0] * dxyFT[0] + dxyTFT[1] * dxyFT[1])   # you need to edit this, it's just a placeholder
-
-    ################# end task 2 ####################################
+    denom = (cTFT * cFT) + rho*(dxyTFT[0] * dxyFT[0] + dxyTFT[1] * dxyFT[1])
 
     for it in tqdm(range(num_iters)):
-
-        ################# begin task 2 ###################################
-
-        # Complete this part by implementing the x-update discussed in
-        # class and in the problem session. If you implemented the
-        # denominator term above, you only need to compute the nominator
-        # here as well as the rest of the x-update
 
         # x update - inverse filtering: Fourier multiplications and divisions
         v = z - u
         vFT = fft2(v)
         x = ifft2((cTFT * bFT + rho * (dxyTFT[0] * vFT[0] + dxyTFT[1] * vFT[1]))/denom)
-
-        ################# end task 2 ####################################
 
         # z update - soft shrinkage
         kappa = lam / rho

@@ -4,7 +4,6 @@ from tqdm import tqdm
 from numpy.fft import fft2, ifft2
 from pypher.pypher import psf2otf
 import torch
-import matplotlib.pyplot as plt
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 

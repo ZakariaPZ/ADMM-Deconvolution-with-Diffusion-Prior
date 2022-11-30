@@ -23,7 +23,7 @@ def deconv_admm_wiener(b, c, lam, rho, num_iters, noise_sigma):
     z = np.zeros_like(b)
     u = np.zeros_like(b)
 
-    denom = (cTFT * cFT) + rho  # you need to edit this placeholder
+    denom = (cTFT * cFT) + rho
 
     for it in tqdm(range(num_iters)):
 
