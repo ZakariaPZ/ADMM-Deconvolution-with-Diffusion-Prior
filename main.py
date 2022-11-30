@@ -20,28 +20,10 @@ from bilateral.deconv_admm_bilateral import *
 
 from dataset import BSDS300Dataset
 
-# Select image
-name = '3096'
-img = io.imread(f'testimgs\{name}.jpg').astype(float)/255
-
-# img = img.tran(img.shape[1], img.shape[2], 3)
-# blur kernel
-c = fspecial_gaussian_2d((30, 30), 2.5)
-
-# Blur kernel
-cFT = psf2otf(c, (img.shape[0], img.shape[1]))
-Afun = lambda x: np.real(ifft2(fft2(x) * cFT))
-
-# noise parameter - standard deviation
-sigma = 0.1
-
-# simulated measurements
-b = np.zeros(np.shape(img))
-for it in range(3):
-    b[:, :, it] = Afun(img[:, :, it]) + sigma * np.random.randn(img.shape[0], img.shape[1])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--img_name', type=str, default='face.png')
     parser.add_argument('-TV', '--TV', action= 'store_true')
     parser.add_argument('-wiener', '--wiener', action = 'store_true')
     parser.add_argument('-dncnn', '--dncnn', action = 'store_true')
@@ -49,6 +31,26 @@ if __name__ == '__main__':
     parser.add_argument('-nlm', '--nlm', action = 'store_true')
 
     args = parser.parse_args()
+
+    # Select image
+    img = io.imread(f'testimgs\{args.img_name}').astype(float)/255
+
+    # img = img.tran(img.shape[1], img.shape[2], 3)
+    # blur kernel
+    c = fspecial_gaussian_2d((30, 30), 2.5)
+
+    # Blur kernel
+    cFT = psf2otf(c, (img.shape[0], img.shape[1]))
+    Afun = lambda x: np.real(ifft2(fft2(x) * cFT))
+
+    # noise parameter - standard deviation
+    sigma = 0.1
+
+    # simulated measurements
+    b = np.zeros(np.shape(img))
+    for it in range(3):
+        b[:, :, it] = Afun(img[:, :, it]) + sigma * np.random.randn(img.shape[0], img.shape[1])
+
 
     all_condition = True
     for arg in vars(args):
