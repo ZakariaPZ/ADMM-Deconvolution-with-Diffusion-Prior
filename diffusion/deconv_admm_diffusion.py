@@ -1,4 +1,4 @@
-from DiffusionDenoiser import DDPMDenoiser
+from .DiffusionDenoiser import DDPMDenoiser
 import numpy as np
 from tqdm import tqdm
 from numpy.fft import fft2, ifft2
@@ -53,7 +53,5 @@ def deconv_admm_diffusion(b, c, lam, rho, num_iters, noise_variance):
 
         # u update
         u = u + x - z
-
-        plt.imsave(f"results/iter{it}_x.png", np.clip(x, 0, 1))
 
     return x

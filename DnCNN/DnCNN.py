@@ -12,7 +12,6 @@ from dataset import BSDS300Dataset
 
 # set random seeds
 torch.manual_seed(1)
-torch.use_deterministic_algorithms(True)
 
 matplotlib.rcParams['figure.raise_window'] = False
 

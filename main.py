@@ -18,6 +18,7 @@ from NLM.deconv_admm_NLM import *
 from DnCNN.deconv_admm_dncnn import *
 from wiener.deconv_admm_wiener import *
 from bilateral.deconv_admm_bilateral import *
+from diffusion.deconv_admm_diffusion import *
 
 from dataset import BSDS300Dataset
 
@@ -30,13 +31,14 @@ if __name__ == '__main__':
     parser.add_argument('-dncnn', '--dncnn', action = 'store_true')
     parser.add_argument('-bilateral', '--bilateral', action = 'store_true')
     parser.add_argument('-nlm', '--nlm', action = 'store_true')
+    parser.add_argument('-diffusion', '--diffusion', action = 'store_true')
 
     args = parser.parse_args()
 
     os.makedirs(f"./results", exist_ok=True)
 
     # Select image
-    img = io.imread(f'testimgs\{args.img_name}').astype(float)/255
+    img = io.imread(f'testimgs/{args.img_name}').astype(float)/255
 
     # blur kernel
     c = fspecial_gaussian_2d((30, 30), 2.5)
@@ -134,3 +136,15 @@ if __name__ == '__main__':
         PSNR_ADMM_NLM = round(compute_psnr(img, x_admm_NLM), 1)
         plt.imsave(f"./results/admm_nlm_psnr{round(PSNR_ADMM_NLM, 1)}.png", x_admm_NLM)
 
+
+    if(args.diffusion or all_condition):
+        num_iters = 10
+        lam = 0.05
+        rho = 1 * 0.5
+
+        # run diffusion denoiser + ADMM
+        x_admm_diffusion = deconv_admm_diffusion(b, c, lam, rho, num_iters, sigma) #TODO: sigma or variance?
+        x_admm_diffusion = np.clip(x_admm_diffusion, 0, 1)
+        img = np.clip(img, 0, 1)
+        PSNR_ADMM_DIFFUSION = round(compute_psnr(img, x_admm_diffusion), 1)
+        plt.imsave(f"./results/admm_diffusion_psnr{round(PSNR_ADMM_DIFFUSION, 1)}.png", x_admm_diffusion)
