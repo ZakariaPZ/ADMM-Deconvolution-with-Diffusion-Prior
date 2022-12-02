@@ -32,7 +32,7 @@ if __name__ == '__main__':
     parser.add_argument('-nlm', '--nlm', action = 'store_true')
     parser.add_argument('-diffusion', '--diffusion', action = 'store_true')
     parser.add_argument('--sigma_noise', type=float, default=0.1)
-
+ 
     args = parser.parse_args()
 
     # create results folder and save config
@@ -54,6 +54,7 @@ if __name__ == '__main__':
     # noise parameter - standard deviation
     sigma = args.sigma_noise
 
+    print(sigma)
     # simulated measurements
     b = np.zeros(np.shape(img))
     for it in range(3):
@@ -66,7 +67,7 @@ if __name__ == '__main__':
     
 
     if(args.TV or all_condition):
-        # # # ADMM parameters for TV prior
+        # ADMM parameters for TV prior
         num_iters = 75
         rho = 5
         lam = 0.025
@@ -81,7 +82,7 @@ if __name__ == '__main__':
 
 
     if(args.wiener or all_condition):
-        # # ADMM parameters for Wiener Prior
+        # ADMM parameters for Wiener Prior
         num_iters = 75
         lam = 0.05
         rho = 1 * 0.5
@@ -96,10 +97,8 @@ if __name__ == '__main__':
 
 
     if(args.dncnn or all_condition):
-        # train DnCNN
-        model = train(sigma=sigma, use_bias=True, hidden_channels=32)
-        torch.save(model, 'DNCNN.pth')
-        model = torch.load('DNCNN.pth')
+        # Load DnCNN
+        model = torch.load('models\DnCNN_{sig}.pth'.format(sig=sigma))
 
         num_iters = 75
         lam = 0.05
@@ -114,11 +113,10 @@ if __name__ == '__main__':
         plt.imsave(f"{output_dir}/admm_dncnn_psnr{round(PSNR_ADMM_DNCNN, 1)}.png", x_admm_dncnn)
 
 
-
     if(args.bilateral or all_condition):
         sigmaIntensity = 0.25
 
-        # # run ADMM+bilateral solver
+        # run ADMM+bilateral solver
         x_admm_bil = np.zeros(np.shape(b))
         for it in range(3):
             x_admm_bil[:, :, it] = deconv_admm_bilateral(b[:, :, it], c, lam, rho, num_iters, sigma, sigmaIntensity)
@@ -134,7 +132,7 @@ if __name__ == '__main__':
         nlmSigma = 0.1
         searchWindowRadius = 2
 
-        # # run ADMM+NLM solver
+        # run ADMM+NLM solver
         x_admm_NLM = np.zeros(np.shape(b))
         for it in range(3):
             x_admm_NLM[:, :, it] = deconv_admm_NLM(b[:, :, it], c, lam, rho, num_iters, searchWindowRadius, sigma, nlmSigma)
