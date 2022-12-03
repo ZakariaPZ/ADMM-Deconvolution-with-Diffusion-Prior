@@ -65,6 +65,8 @@ if __name__ == '__main__':
     for it in range(3):
         b[:, :, it] = Afun(img[:, :, it]) + sigma * np.random.randn(img.shape[0], img.shape[1])
 
+    # save degraded image
+    plt.imsave(f"{output_dir}/degraded.png", np.clip(b, 0, 1))
 
     all_condition = True
     for arg in vars(args):
