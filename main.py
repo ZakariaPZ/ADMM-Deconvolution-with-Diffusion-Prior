@@ -120,6 +120,7 @@ if __name__ == '__main__':
         x_admm_bil = np.zeros(np.shape(b))
         for it in range(3):
             x_admm_bil[:, :, it] = deconv_admm_bilateral(b[:, :, it], c, lam, rho, num_iters, sigma, sigmaIntensity)
+        x_admm_bil = np.clip(x_admm_bil , 0, 1)
         PSNR_ADMM_BIL = round(compute_psnr(img, x_admm_bil), 1)
         plt.imsave(f"{output_dir}/admm_bil_psnr{round(PSNR_ADMM_BIL, 1)}.png", x_admm_bil)
 
@@ -136,6 +137,7 @@ if __name__ == '__main__':
         x_admm_NLM = np.zeros(np.shape(b))
         for it in range(3):
             x_admm_NLM[:, :, it] = deconv_admm_NLM(b[:, :, it], c, lam, rho, num_iters, searchWindowRadius, sigma, nlmSigma)
+        x_admm_NLM = np.clip(x_admm_NLM , 0, 1)
         PSNR_ADMM_NLM = round(compute_psnr(img, x_admm_NLM), 1)
         plt.imsave(f"{output_dir}/admm_nlm_psnr{round(PSNR_ADMM_NLM, 1)}.png", x_admm_NLM)
 
