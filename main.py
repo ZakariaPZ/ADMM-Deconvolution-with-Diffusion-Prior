@@ -4,6 +4,7 @@ from numpy.fft import fft2, ifft2
 import argparse
 import skimage.io as io
 from skimage.metrics import peak_signal_noise_ratio as compute_psnr
+from skimage.transform import resize
 import os
 import datetime
 import json
@@ -32,6 +33,7 @@ if __name__ == '__main__':
     parser.add_argument('-nlm', '--nlm', action = 'store_true')
     parser.add_argument('-diffusion', '--diffusion', action = 'store_true')
     parser.add_argument('--sigma_noise', type=float, default=0.1)
+    parser.add_argument('--img_size', type=int, default=256)
  
     args = parser.parse_args()
 
@@ -43,9 +45,12 @@ if __name__ == '__main__':
 
     # Select image
     img = io.imread(f'testimgs/{args.img_name}').astype(float)/255
+    img = resize(img, (args.img_size, args.img_size))
 
     # blur kernel
-    c = fspecial_gaussian_2d((30, 30), 2.5)
+    kernel_size = 30 if args.img_size==512 else 15
+    kernel_sigma = 2.5 if args.img_size==512 else 1.25
+    c = fspecial_gaussian_2d((kernel_size, kernel_size), kernel_sigma)
 
     # Blur kernel
     cFT = psf2otf(c, (img.shape[0], img.shape[1]))
@@ -98,7 +103,7 @@ if __name__ == '__main__':
 
     if(args.dncnn or all_condition):
         # Load DnCNN
-        model = torch.load('models\DnCNN_{sig}.pth'.format(sig=sigma))
+        model = torch.load(f'models/DnCNN_{sigma}_{args.img_size}.pth')
 
         num_iters = 75
         lam = 0.05
@@ -148,7 +153,7 @@ if __name__ == '__main__':
         rho = 1 * 0.5
 
         # run diffusion denoiser + ADMM
-        x_admm_diffusion = deconv_admm_diffusion(b, c, lam, rho, num_iters, sigma) #TODO: sigma or variance?
+        x_admm_diffusion = deconv_admm_diffusion(b, c, lam, rho, num_iters, sigma)
         x_admm_diffusion = np.clip(x_admm_diffusion, 0, 1)
         img = np.clip(img, 0, 1)
         PSNR_ADMM_DIFFUSION = round(compute_psnr(img, x_admm_diffusion), 1)
