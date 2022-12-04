@@ -11,8 +11,8 @@ def bilateral2d(img, sigma, sigmaIntensity):
     imgPad = np.pad(img, pad)
 
     # Smoothing kernel, gaussian with standard deviation sigma
-    # and size (2*radius+1, 2*radius+1)
-    filtSize = (2*radius + 1, 2*radius + 1)
+    # and size (5, 5)
+    filtSize = (5, 5)
     spatialKernel = fspecial_gaussian_2d(filtSize, sigma)
     for y in range(img.shape[0]):
         for x in range(img.shape[1]):
