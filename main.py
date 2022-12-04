@@ -122,6 +122,9 @@ if __name__ == '__main__':
 
     if(args.bilateral or all_condition):
         sigmaIntensity = 0.25
+        num_iters = 75
+        lam = 0.05
+        rho = 1 * 0.5
 
         # run ADMM+bilateral solver
         x_admm_bil = np.zeros(np.shape(b))
