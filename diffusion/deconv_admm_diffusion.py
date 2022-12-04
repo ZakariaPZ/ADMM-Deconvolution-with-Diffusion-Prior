@@ -4,6 +4,7 @@ from tqdm import tqdm
 from numpy.fft import fft2, ifft2
 from pypher.pypher import psf2otf
 import torch
+from skimage.transform import resize
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -43,12 +44,14 @@ def deconv_admm_diffusion(b, c, lam, rho, num_iters, noise_variance):
         v = x + u
 
         # run diffusion denoiser
-        v_tensor = torch.from_numpy(v[None, :]).permute(0, 3, 1, 2).float().to(device)
+        v_resized = resize(v, (256, 256))
+        v_tensor = torch.from_numpy(v_resized[None, :]).permute(0, 3, 1, 2).float().to(device)
 
         init_t = model.get_init_timestep_from_variance(var=noise_variance)
         v_tensor_denoised = model(init_image=v_tensor.clamp(0, 1), init_t=init_t)
 
         z = torch.squeeze(v_tensor_denoised).permute(1, 2, 0).cpu().numpy()
+        z = resize(z, (v.shape[0], v.shape[0]))
 
         # u update
         u = u + x - z
